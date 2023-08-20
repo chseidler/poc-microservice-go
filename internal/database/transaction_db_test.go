@@ -2,6 +2,7 @@ package database
 
 import (
 	"database/sql"
+	"testing"
 
 	"github.com/chseidler/poc-microservice-go/internal/entity"
 	"github.com/stretchr/testify/suite"
@@ -23,7 +24,7 @@ func (s *TransactionDBTestSuite) SetupSuite() {
 	s.db = db
 	db.Exec("Create table clients (id varchar(255), name varchar(255), email varchar(255), created_at date)")
 	db.Exec("Create table accounts (id varchar(255), client_id varchar(255), balance float, created_at date)")
-	db.Exec("Create table transactions (id varchar(255), account_id_from varchar(255), account_id_from varchar(255), ammout int, created_at date)")
+	db.Exec("Create table transactions (id varchar(255), account_id_from varchar(255), account_id_to varchar(255), amount int, created_at date)")
 
 	client, _ := entity.NewClient("John", "j@j.com")
 	s.Nil(err)
@@ -49,4 +50,15 @@ func (s *TransactionDBTestSuite) TearDownSuite() {
 	s.db.Exec("DROP TABLE clients")
 	s.db.Exec("DROP TABLE accounts")
 	s.db.Exec("DROP TABLE transactions")
+}
+
+func TestTransactionDBTestSuite(t *testing.T) {
+	suite.Run(t, new(TransactionDBTestSuite))
+}
+
+func (s *TransactionDBTestSuite) TestCreate() {
+	trasaction, err := entity.NewTransaction(s.accountFrom, s.accountTo, 100)
+	s.Nil(err)
+	err = s.transactionDB.Create(trasaction)
+	s.Nil(err)
 }
